@@ -24,9 +24,9 @@ export function Footer() {
             </div>
           </div>
           {[
-            { t: "Product", l: ["Dashboard", "Devices", "Automations", "Pricing"] },
-            { t: "Support", l: ["Help Center", "Docs", "Status", "Contact"] },
-            { t: "Company", l: ["About", "Careers", "Press", "Privacy"] },
+            { t: "Product", l: ["Dashboard", "Devices", "Marketplace", "Store", "Pricing"] },
+            { t: "Developers", l: ["Docs", "API Reference", "Tutorials", "Status", "Community"] },
+            { t: "Company", l: ["About", "Partners", "Careers", "Contact", "Privacy"] },
           ].map(col => (
             <div key={col.t}>
               <p className="text-sm font-medium">{col.t}</p>

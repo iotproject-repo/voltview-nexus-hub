@@ -19,25 +19,24 @@ export function Hero() {
             Live · 12,480 devices online
           </div>
           <h1 className="mt-6 font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl">
-            Control every <span className="text-gradient">amp</span>.
-            <br />Trust every <span className="text-gradient">device</span>.
+            Control every electrical<br />device <span className="text-gradient">intelligently</span>.
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground sm:text-lg">
-            VoltView is the calm, intelligent operating system for motors, pumps, lights and
-            industrial systems — realtime current monitoring with the simplicity of a thermostat.
+            Realtime monitoring, smart automation, and intelligent protection for
+            homes, farms, and industries — in one calm, beautiful platform.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/dashboard"
               className="gradient-primary inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-95 glow"
             >
-              Launch Dashboard <ArrowRight className="h-4 w-4" />
+              Explore Platform <ArrowRight className="h-4 w-4" />
             </Link>
             <a
-              href="#devices"
+              href="#demo"
               className="glass inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-foreground transition hover:bg-surface-elevated"
             >
-              Explore Devices
+              Watch Demo
             </a>
           </div>
         </div>
