@@ -19,10 +19,11 @@ export function Nav() {
             <span className="font-display text-lg font-semibold tracking-tight">VoltView</span>
           </Link>
           <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
-            <a href="#dashboard" className="transition hover:text-foreground">Dashboard</a>
+            <a href="#dashboard" className="transition hover:text-foreground">Platform</a>
             <a href="#devices" className="transition hover:text-foreground">Devices</a>
-            <a href="#features" className="transition hover:text-foreground">Features</a>
+            <a href="#marketplace" className="transition hover:text-foreground">Marketplace</a>
             <a href="#ai" className="transition hover:text-foreground">AI</a>
+            <a href="#partners" className="transition hover:text-foreground">Partners</a>
             <Link to="/store" className="transition hover:text-foreground">Store</Link>
           </nav>
           <div className="flex items-center gap-2">
