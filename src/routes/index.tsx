@@ -19,8 +19,8 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "VoltView — The operating system for electrical intelligence" },
       { name: "description", content: "Realtime monitoring, smart automation, and intelligent protection for homes, farms, and industries. One calm platform for every electrical device." },
-      { property: "og:title", content: "VoltView — Control every electrical device intelligently" },
-      { property: "og:description", content: "The unified smart electrical control ecosystem for motors, pumps, smart homes and industrial systems." },
+      { property: "og:title", content: "VoltView — The operating system for electrical intelligence" },
+      { property: "og:description", content: "Realtime monitoring, smart automation, and intelligent protection for homes, farms, and industries. One calm platform for every electrical device." },
     ],
   }),
   component: Index,
