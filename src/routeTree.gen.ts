@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ControlPanelRouteImport } from './routes/control-panel'
 import { Route as AddDeviceRouteImport } from './routes/add-device'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -22,6 +23,11 @@ const StoreRoute = StoreRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ControlPanelRoute = ControlPanelRouteImport.update({
+  id: '/control-panel',
+  path: '/control-panel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AddDeviceRoute = AddDeviceRouteImport.update({
@@ -38,12 +44,14 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/add-device': typeof AddDeviceRoute
+  '/control-panel': typeof ControlPanelRoute
   '/dashboard': typeof DashboardRoute
   '/store': typeof StoreRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/add-device': typeof AddDeviceRoute
+  '/control-panel': typeof ControlPanelRoute
   '/dashboard': typeof DashboardRoute
   '/store': typeof StoreRoute
 }
@@ -51,20 +59,28 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/add-device': typeof AddDeviceRoute
+  '/control-panel': typeof ControlPanelRoute
   '/dashboard': typeof DashboardRoute
   '/store': typeof StoreRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/add-device' | '/dashboard' | '/store'
+  fullPaths: '/' | '/add-device' | '/control-panel' | '/dashboard' | '/store'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/add-device' | '/dashboard' | '/store'
-  id: '__root__' | '/' | '/add-device' | '/dashboard' | '/store'
+  to: '/' | '/add-device' | '/control-panel' | '/dashboard' | '/store'
+  id:
+    | '__root__'
+    | '/'
+    | '/add-device'
+    | '/control-panel'
+    | '/dashboard'
+    | '/store'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AddDeviceRoute: typeof AddDeviceRoute
+  ControlPanelRoute: typeof ControlPanelRoute
   DashboardRoute: typeof DashboardRoute
   StoreRoute: typeof StoreRoute
 }
@@ -83,6 +99,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/control-panel': {
+      id: '/control-panel'
+      path: '/control-panel'
+      fullPath: '/control-panel'
+      preLoaderRoute: typeof ControlPanelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/add-device': {
@@ -105,6 +128,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AddDeviceRoute: AddDeviceRoute,
+  ControlPanelRoute: ControlPanelRoute,
   DashboardRoute: DashboardRoute,
   StoreRoute: StoreRoute,
 }
