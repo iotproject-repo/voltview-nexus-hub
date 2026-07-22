@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Activity, Bell, Cpu, Droplet, Gauge, Home, Lightbulb, Power, Search, Settings, Zap, AlertTriangle, Plus } from "lucide-react";
+import { Activity, Bell, Cpu, Droplet, Gauge, Home, Lightbulb, Power, Search, Settings, Zap, AlertTriangle, Plus, SlidersHorizontal } from "lucide-react";
+
 import { useEffect } from "react";
 import { LiveChart } from "@/components/voltview/LiveChart";
 
@@ -33,11 +34,12 @@ function Dashboard() {
 
 function Sidebar() {
   const items = [
-    { i: Home, n: "Overview", active: true },
-    { i: Cpu, n: "Devices" },
-    { i: Activity, n: "Monitoring" },
-    { i: Bell, n: "Alerts" },
-    { i: Settings, n: "Settings" },
+    { i: Home, n: "Overview", to: "/dashboard", active: true },
+    { i: SlidersHorizontal, n: "Control Panel", to: "/control-panel" },
+    { i: Cpu, n: "Devices", to: "/dashboard" },
+    { i: Activity, n: "Monitoring", to: "/dashboard" },
+    { i: Bell, n: "Alerts", to: "/dashboard" },
+    { i: Settings, n: "Settings", to: "/dashboard" },
   ];
   return (
     <aside className="hidden w-60 shrink-0 lg:block">
@@ -49,12 +51,18 @@ function Sidebar() {
           <span className="font-display text-lg font-semibold">VoltView</span>
         </Link>
         <nav className="space-y-1">
-          {items.map(({ i: I, n, active }) => (
-            <a key={n} href="#" className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${active ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}>
+          {items.map(({ i: I, n, to, active }) => (
+            <Link
+              key={n}
+              to={to}
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${active ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+              activeProps={{ className: "bg-primary/15 text-primary" }}
+            >
               <I className="h-4 w-4" /> {n}
-            </a>
+            </Link>
           ))}
         </nav>
+
         <div className="mt-6 rounded-2xl bg-surface p-4">
           <p className="text-xs text-muted-foreground">Plan</p>
           <p className="mt-1 font-display text-base font-semibold">Pro Workspace</p>
