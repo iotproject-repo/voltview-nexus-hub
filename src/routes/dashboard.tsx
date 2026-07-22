@@ -73,9 +73,12 @@ function TopBar() {
         <input className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" placeholder="Search devices, automations, alerts…" />
       </div>
       <button className="grid h-10 w-10 place-items-center rounded-xl bg-surface text-muted-foreground"><Bell className="h-4 w-4" /></button>
-      <button className="gradient-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium text-primary-foreground">
+      <Link
+        to="/add-device"
+        className="gradient-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium text-primary-foreground"
+      >
         <Plus className="h-4 w-4" /> Add device
-      </button>
+      </Link>
     </div>
   );
 }

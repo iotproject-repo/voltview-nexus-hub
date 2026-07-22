@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AddDeviceRouteImport } from './routes/add-device'
 import { Route as IndexRouteImport } from './routes/index'
 
 const StoreRoute = StoreRouteImport.update({
@@ -23,6 +24,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AddDeviceRoute = AddDeviceRouteImport.update({
+  id: '/add-device',
+  path: '/add-device',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,30 +37,34 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/add-device': typeof AddDeviceRoute
   '/dashboard': typeof DashboardRoute
   '/store': typeof StoreRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/add-device': typeof AddDeviceRoute
   '/dashboard': typeof DashboardRoute
   '/store': typeof StoreRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/add-device': typeof AddDeviceRoute
   '/dashboard': typeof DashboardRoute
   '/store': typeof StoreRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/store'
+  fullPaths: '/' | '/add-device' | '/dashboard' | '/store'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/store'
-  id: '__root__' | '/' | '/dashboard' | '/store'
+  to: '/' | '/add-device' | '/dashboard' | '/store'
+  id: '__root__' | '/' | '/add-device' | '/dashboard' | '/store'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AddDeviceRoute: typeof AddDeviceRoute
   DashboardRoute: typeof DashboardRoute
   StoreRoute: typeof StoreRoute
 }
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/add-device': {
+      id: '/add-device'
+      path: '/add-device'
+      fullPath: '/add-device'
+      preLoaderRoute: typeof AddDeviceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AddDeviceRoute: AddDeviceRoute,
   DashboardRoute: DashboardRoute,
   StoreRoute: StoreRoute,
 }
