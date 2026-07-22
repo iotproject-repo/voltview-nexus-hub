@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Activity, Bell, Cpu, Droplet, Gauge, Home, Lightbulb, Power, Search, Settings, Zap, AlertTriangle, Plus } from "lucide-react";
+import { Activity, Bell, Cpu, Droplet, Gauge, Home, Lightbulb, Power, Search, Settings, Zap, AlertTriangle, Plus, SlidersHorizontal } from "lucide-react";
+
 import { useEffect } from "react";
 import { LiveChart } from "@/components/voltview/LiveChart";
 
