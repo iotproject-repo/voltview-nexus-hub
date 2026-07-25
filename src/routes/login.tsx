@@ -1,8 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { isAuthenticated, sanitizeRedirect } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/login")({
+  ssr: false,
+  beforeLoad: ({ search }) => {
+    if (typeof window !== "undefined" && isAuthenticated()) {
+      const target = sanitizeRedirect((search as { redirect?: string })?.redirect);
+      throw redirect({ to: target, replace: true });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Login — VoltView" },
