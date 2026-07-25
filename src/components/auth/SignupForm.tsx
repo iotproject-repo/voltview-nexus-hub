@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Loader2, UserPlus } from "lucide-react";
 import { PasswordInput } from "./PasswordInput";
 import { handleSignup } from "@/lib/auth-api";
+import { setAuthenticated } from "@/lib/auth-store";
 
 const schema = z
   .object({
@@ -22,6 +23,7 @@ type Values = z.infer<typeof schema>;
 
 export function SignupForm() {
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -34,8 +36,11 @@ export function SignupForm() {
   const onSubmit = async (values: Values) => {
     setSubmitting(true);
     await handleSignup({ name: values.name, email: values.email, password: values.password });
+    setAuthenticated(true);
     setSubmitting(false);
+    navigate({ to: "/dashboard" });
   };
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
