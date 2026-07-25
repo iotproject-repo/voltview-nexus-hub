@@ -3,10 +3,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Loader2, LogIn } from "lucide-react";
+import { Loader2, LogIn, ShieldAlert } from "lucide-react";
 import { PasswordInput } from "./PasswordInput";
 import { handleLogin } from "@/lib/auth-api";
-import { setAuthenticated } from "@/lib/auth-store";
+import { sanitizeRedirect, setAuthenticated } from "@/lib/auth-store";
 
 const schema = z.object({
   email: z.string().trim().min(1, "Email is required").email("Enter a valid email"),
@@ -18,6 +18,8 @@ export function LoginForm() {
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as { redirect?: string };
+  const redirectTarget = sanitizeRedirect(search?.redirect);
+  const showUnauthorized = typeof search?.redirect === "string" && search.redirect.length > 0;
   const {
     register,
     handleSubmit,
@@ -32,12 +34,20 @@ export function LoginForm() {
     await handleLogin(values);
     setAuthenticated(true);
     setSubmitting(false);
-    const target = typeof search?.redirect === "string" ? search.redirect : "/dashboard";
-    navigate({ to: target });
+    navigate({ to: redirectTarget, replace: true });
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {showUnauthorized && (
+        <div
+          role="alert"
+          className="flex items-start gap-2.5 rounded-xl border border-warning/40 bg-warning/10 px-3.5 py-2.5 text-xs text-warning"
+        >
+          <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>You need to sign in to access that page.</span>
+        </div>
+      )}
       <div className="space-y-1.5">
         <label htmlFor="email" className="text-sm font-medium text-foreground">
           Email Address
