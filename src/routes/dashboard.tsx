@@ -1,10 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { Activity, Bell, Cpu, Droplet, Gauge, Home, Lightbulb, Power, Search, Settings, Zap, AlertTriangle, Plus, SlidersHorizontal } from "lucide-react";
 
 import { useEffect } from "react";
 import { LiveChart } from "@/components/voltview/LiveChart";
+import { isAuthenticated } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/dashboard")({
+  ssr: false,
+  beforeLoad: ({ location }) => {
+    if (typeof window !== "undefined" && !isAuthenticated()) {
+      throw redirect({ to: "/login", search: { redirect: location.href } });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Dashboard — VoltView" },
