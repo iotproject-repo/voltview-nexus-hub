@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { User, LogIn } from "lucide-react";
+import { User, LogIn, LogOut, LayoutDashboard, UserPlus } from "lucide-react";
+import { logout, useAuth } from "@/lib/auth-store";
 
 export function ProfileMenu() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const authed = useAuth();
 
   useEffect(() => {
     if (!open) return;
@@ -22,6 +24,12 @@ export function ProfileMenu() {
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
+
+  const handleLogout = () => {
+    setOpen(false);
+    logout();
+    navigate({ to: "/", replace: true });
+  };
 
   return (
     <div ref={containerRef} className="relative">
@@ -40,17 +48,54 @@ export function ProfileMenu() {
           role="menu"
           className="glass absolute right-0 mt-2 w-52 origin-top-right rounded-2xl p-2 shadow-2xl animate-fade-in"
         >
-          <button
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              navigate({ to: "/login" });
-            }}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground transition hover:bg-accent hover:text-primary"
-          >
-            <LogIn className="h-4 w-4" />
-            <span>Login</span>
-          </button>
+          {authed ? (
+            <>
+              <button
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false);
+                  navigate({ to: "/dashboard" });
+                }}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground transition hover:bg-accent hover:text-primary"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                <span>Dashboard</span>
+              </button>
+              <button
+                role="menuitem"
+                onClick={handleLogout}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground transition hover:bg-accent hover:text-primary"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false);
+                  navigate({ to: "/login" });
+                }}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground transition hover:bg-accent hover:text-primary"
+              >
+                <LogIn className="h-4 w-4" />
+                <span>Login</span>
+              </button>
+              <button
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false);
+                  navigate({ to: "/signup" });
+                }}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground transition hover:bg-accent hover:text-primary"
+              >
+                <UserPlus className="h-4 w-4" />
+                <span>Create account</span>
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>
