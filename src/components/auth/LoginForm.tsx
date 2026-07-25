@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Loader2, LogIn } from "lucide-react";
 import { PasswordInput } from "./PasswordInput";
 import { handleLogin } from "@/lib/auth-api";
+import { setAuthenticated } from "@/lib/auth-store";
 
 const schema = z.object({
   email: z.string().trim().min(1, "Email is required").email("Enter a valid email"),
@@ -15,6 +16,8 @@ type Values = z.infer<typeof schema>;
 
 export function LoginForm() {
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const search = useSearch({ strict: false }) as { redirect?: string };
   const {
     register,
     handleSubmit,
@@ -27,7 +30,10 @@ export function LoginForm() {
   const onSubmit = async (values: Values) => {
     setSubmitting(true);
     await handleLogin(values);
+    setAuthenticated(true);
     setSubmitting(false);
+    const target = typeof search?.redirect === "string" ? search.redirect : "/dashboard";
+    navigate({ to: target });
   };
 
   return (
@@ -80,7 +86,7 @@ export function LoginForm() {
         ) : (
           <>
             <LogIn className="h-4 w-4" />
-            Login
+            Sign In
           </>
         )}
       </button>
