@@ -11,6 +11,7 @@ import { sanitizeRedirect, setAuthenticated } from "@/lib/auth-store";
 const schema = z.object({
   email: z.string().trim().min(1, "Email is required").email("Enter a valid email"),
   password: z.string().min(1, "Password is required"),
+  remember: z.boolean().optional(),
 });
 type Values = z.infer<typeof schema>;
 
