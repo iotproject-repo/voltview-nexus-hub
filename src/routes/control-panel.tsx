@@ -1,12 +1,19 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Activity, Bell, Cpu, Home, Search, Settings, SlidersHorizontal, Zap } from "lucide-react";
 import { getUserDevices, getDeviceCapabilities, type DeviceSummary, type DeviceDetail } from "@/lib/devices-api";
 import { DeviceList } from "@/components/control-panel/DeviceList";
 import { EmptyState } from "@/components/control-panel/EmptyState";
 import { ControlRenderer } from "@/components/control-panel/ControlRenderer";
+import { isAuthenticated } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/control-panel")({
+  ssr: false,
+  beforeLoad: ({ location }) => {
+    if (typeof window !== "undefined" && !isAuthenticated()) {
+      throw redirect({ to: "/login", search: { redirect: location.href } });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Control Panel — VoltView" },
