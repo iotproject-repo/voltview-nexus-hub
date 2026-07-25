@@ -1,8 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { SignupForm } from "@/components/auth/SignupForm";
+import { isAuthenticated } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/signup")({
+  ssr: false,
+  beforeLoad: () => {
+    if (typeof window !== "undefined" && isAuthenticated()) {
+      throw redirect({ to: "/dashboard", replace: true });
+    }
+  },
+
   head: () => ({
     meta: [
       { title: "Create Account — VoltView" },
