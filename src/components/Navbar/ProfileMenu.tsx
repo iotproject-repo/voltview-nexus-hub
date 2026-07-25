@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { User, LogIn } from "lucide-react";
 
 export function ProfileMenu() {
@@ -44,7 +44,7 @@ export function ProfileMenu() {
             role="menuitem"
             onClick={() => {
               setOpen(false);
-              navigate({ to: "/login" });
+              navigate({ to: "/login" as any });
             }}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground transition hover:bg-accent hover:text-primary"
           >
