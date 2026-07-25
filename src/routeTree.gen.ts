@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StoreRouteImport } from './routes/store'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ControlPanelRouteImport } from './routes/control-panel'
 import { Route as AddDeviceRouteImport } from './routes/add-device'
@@ -18,6 +20,16 @@ import { Route as IndexRouteImport } from './routes/index'
 const StoreRoute = StoreRouteImport.update({
   id: '/store',
   path: '/store',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -46,6 +58,8 @@ export interface FileRoutesByFullPath {
   '/add-device': typeof AddDeviceRoute
   '/control-panel': typeof ControlPanelRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/store': typeof StoreRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +67,8 @@ export interface FileRoutesByTo {
   '/add-device': typeof AddDeviceRoute
   '/control-panel': typeof ControlPanelRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/store': typeof StoreRoute
 }
 export interface FileRoutesById {
@@ -61,19 +77,37 @@ export interface FileRoutesById {
   '/add-device': typeof AddDeviceRoute
   '/control-panel': typeof ControlPanelRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/store': typeof StoreRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/add-device' | '/control-panel' | '/dashboard' | '/store'
+  fullPaths:
+    | '/'
+    | '/add-device'
+    | '/control-panel'
+    | '/dashboard'
+    | '/login'
+    | '/signup'
+    | '/store'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/add-device' | '/control-panel' | '/dashboard' | '/store'
+  to:
+    | '/'
+    | '/add-device'
+    | '/control-panel'
+    | '/dashboard'
+    | '/login'
+    | '/signup'
+    | '/store'
   id:
     | '__root__'
     | '/'
     | '/add-device'
     | '/control-panel'
     | '/dashboard'
+    | '/login'
+    | '/signup'
     | '/store'
   fileRoutesById: FileRoutesById
 }
@@ -82,6 +116,8 @@ export interface RootRouteChildren {
   AddDeviceRoute: typeof AddDeviceRoute
   ControlPanelRoute: typeof ControlPanelRoute
   DashboardRoute: typeof DashboardRoute
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
   StoreRoute: typeof StoreRoute
 }
 
@@ -92,6 +128,20 @@ declare module '@tanstack/react-router' {
       path: '/store'
       fullPath: '/store'
       preLoaderRoute: typeof StoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -130,6 +180,8 @@ const rootRouteChildren: RootRouteChildren = {
   AddDeviceRoute: AddDeviceRoute,
   ControlPanelRoute: ControlPanelRoute,
   DashboardRoute: DashboardRoute,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
   StoreRoute: StoreRoute,
 }
 export const routeTree = rootRouteImport

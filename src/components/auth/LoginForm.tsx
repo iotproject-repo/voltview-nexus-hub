@@ -1,0 +1,96 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Link } from "@tanstack/react-router";
+import { Loader2, LogIn } from "lucide-react";
+import { PasswordInput } from "./PasswordInput";
+import { handleLogin } from "@/lib/auth-api";
+
+const schema = z.object({
+  email: z.string().trim().min(1, "Email is required").email("Enter a valid email"),
+  password: z.string().min(1, "Password is required"),
+});
+type Values = z.infer<typeof schema>;
+
+export function LoginForm() {
+  const [submitting, setSubmitting] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const onSubmit = async (values: Values) => {
+    setSubmitting(true);
+    await handleLogin(values);
+    setSubmitting(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <div className="space-y-1.5">
+        <label htmlFor="email" className="text-sm font-medium text-foreground">
+          Email Address
+        </label>
+        <input
+          id="email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          {...register("email")}
+          className="w-full rounded-xl border border-input bg-surface px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30"
+        />
+        {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <label htmlFor="password" className="text-sm font-medium text-foreground">
+            Password
+          </label>
+          <span className="cursor-pointer text-xs text-muted-foreground transition hover:text-primary">
+            Forgot Password?
+          </span>
+        </div>
+        <PasswordInput
+          id="password"
+          autoComplete="current-password"
+          placeholder="Enter your password"
+          {...register("password")}
+        />
+        {errors.password && (
+          <p className="text-xs text-destructive">{errors.password.message}</p>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        disabled={submitting}
+        className="gradient-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {submitting ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Signing in…
+          </>
+        ) : (
+          <>
+            <LogIn className="h-4 w-4" />
+            Login
+          </>
+        )}
+      </button>
+
+      <p className="text-center text-sm text-muted-foreground">
+        Don't have an account?{" "}
+        <Link to="/signup" className="font-medium text-primary transition hover:opacity-80">
+          Create Account
+        </Link>
+      </p>
+    </form>
+  );
+}
