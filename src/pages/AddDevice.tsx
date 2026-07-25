@@ -2,8 +2,10 @@ import { useEffect } from "react";
 import { AddDeviceForm } from "@/components/AddDeviceForm";
 import { Zap } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useRequireAuth } from "@/lib/auth-guard";
 
 export function AddDevice() {
+  useRequireAuth();
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);

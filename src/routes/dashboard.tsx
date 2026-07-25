@@ -4,6 +4,7 @@ import { Activity, Bell, Cpu, Droplet, Gauge, Home, Lightbulb, Power, Search, Se
 import { useEffect } from "react";
 import { LiveChart } from "@/components/voltview/LiveChart";
 import { isAuthenticated } from "@/lib/auth-store";
+import { useRequireAuth } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/dashboard")({
   ssr: false,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function Dashboard() {
+  useRequireAuth();
   useEffect(() => { document.documentElement.classList.add("dark"); }, []);
 
   return (

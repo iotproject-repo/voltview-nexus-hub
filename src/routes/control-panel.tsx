@@ -6,6 +6,7 @@ import { DeviceList } from "@/components/control-panel/DeviceList";
 import { EmptyState } from "@/components/control-panel/EmptyState";
 import { ControlRenderer } from "@/components/control-panel/ControlRenderer";
 import { isAuthenticated } from "@/lib/auth-store";
+import { useRequireAuth } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/control-panel")({
   ssr: false,
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/control-panel")({
 });
 
 function ControlPanelPage() {
+  useRequireAuth();
   useEffect(() => { document.documentElement.classList.add("dark"); }, []);
 
   const [devices, setDevices] = useState<DeviceSummary[]>([]);
