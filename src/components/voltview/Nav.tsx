@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Zap, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ProfileMenu } from "@/components/Navbar/ProfileMenu";
+
 
 export function Nav() {
   const [dark, setDark] = useState(true);
@@ -40,7 +42,9 @@ export function Nav() {
             >
               Open App
             </Link>
+            <ProfileMenu />
           </div>
+
         </div>
       </div>
     </header>
