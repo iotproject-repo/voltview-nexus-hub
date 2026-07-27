@@ -134,12 +134,10 @@ function mapDevice(raw: unknown): DeviceSummary | null {
 
   const model = (r.model as string) ?? (r.modelName as string) ?? "";
 
-  const rawStatus =
-    (r.status as string) ??
-    (typeof r.online === "boolean" ? (r.online ? "online" : "offline") : "") ??
-    (typeof r.isOnline === "boolean" ? (r.isOnline ? "online" : "offline") : "");
-  const status: DeviceStatus =
-    String(rawStatus).toLowerCase() === "online" ? "online" : "offline";
+  let rawStatus: string = (r.status as string) ?? "";
+  if (!rawStatus && typeof r.online === "boolean") rawStatus = r.online ? "online" : "offline";
+  if (!rawStatus && typeof r.isOnline === "boolean") rawStatus = r.isOnline ? "online" : "offline";
+  const status: DeviceStatus = rawStatus.toLowerCase() === "online" ? "online" : "offline";
 
   const lastSeen =
     (r.lastSeen as string) ??
