@@ -36,7 +36,74 @@ export interface DeviceDetail {
   relays?: Relay[];
 }
 
-import { api } from "./api-client";
+const MOCK_DETAILS: Record<string, DeviceDetail> = {
+  DEV001: {
+    deviceId: "DEV001",
+    deviceName: "Living Room Controller",
+    model: "HV4F",
+    category: "home_automation",
+    status: "online",
+    capabilities: { relayCount: 4, fan: true, fanSpeedControl: true, scheduler: true, energyMonitoring: false },
+    relays: [
+      { id: 1, name: "Light" },
+      { id: 2, name: "Fan" },
+      { id: 3, name: "Socket" },
+      { id: 4, name: "Garden" },
+    ],
+  },
+  DEV002: {
+    deviceId: "DEV002",
+    deviceName: "Office 8-Relay Panel",
+    model: "HV8",
+    category: "home_automation",
+    status: "online",
+    capabilities: { relayCount: 8, scheduler: true, energyMonitoring: true },
+    relays: Array.from({ length: 8 }, (_, i) => ({ id: i + 1, name: `Channel ${i + 1}` })),
+  },
+  DEV003: {
+    deviceId: "DEV003",
+    deviceName: "Farm Pump A",
+    model: "AG1",
+    category: "agriculture",
+    status: "offline",
+    capabilities: { relayCount: 1, scheduler: true, motorProtection: true },
+    relays: [{ id: 1, name: "Pump" }],
+  },
+  DEV004: {
+    deviceId: "DEV004",
+    deviceName: "Greenhouse Node",
+    model: "AG3S",
+    category: "agriculture",
+    status: "online",
+    capabilities: { relayCount: 3, scheduler: true, temperatureSensor: true, humiditySensor: true },
+    relays: [
+      { id: 1, name: "Drip" },
+      { id: 2, name: "Sprinkler" },
+      { id: 3, name: "Fogger" },
+    ],
+  },
+  DEV005: {
+    deviceId: "DEV005",
+    deviceName: "Borewell Pump",
+    model: "WPC-Pro",
+    category: "water_pump",
+    status: "online",
+    capabilities: { relayCount: 1, waterLevelSensor: true, motorProtection: true, scheduler: true, energyMonitoring: true },
+    relays: [{ id: 1, name: "Motor" }],
+  },
+  DEV006: {
+    deviceId: "DEV006",
+    deviceName: "Main Panel Meter",
+    model: "SEM-3P",
+    category: "energy_meter",
+    status: "online",
+    capabilities: { energyMonitoring: true },
+  },
+};
+
+const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+
 
 // Defensive mapper: the backend response shape may vary and some UI fields
 // (deviceType, model, lastSeen) may not be present. When missing we leave
