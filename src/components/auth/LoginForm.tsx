@@ -17,6 +17,7 @@ type Values = z.infer<typeof schema>;
 
 export function LoginForm() {
   const [submitting, setSubmitting] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as { redirect?: string };
   const redirectTarget = sanitizeRedirect(search?.redirect);
@@ -32,10 +33,16 @@ export function LoginForm() {
 
   const onSubmit = async (values: Values) => {
     setSubmitting(true);
-    await handleLogin(values);
-    setAuthenticated(true, { remember: !!values.remember });
-    setSubmitting(false);
-    navigate({ to: redirectTarget, replace: true });
+    setApiError(null);
+    try {
+      await handleLogin(values);
+      setAuthenticated(true, { remember: !!values.remember });
+      navigate({ to: redirectTarget, replace: true });
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : "Login failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -47,6 +54,15 @@ export function LoginForm() {
         >
           <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>You need to sign in to access that page.</span>
+        </div>
+      )}
+      {apiError && (
+        <div
+          role="alert"
+          className="flex items-start gap-2.5 rounded-xl border border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-xs text-destructive"
+        >
+          <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>{apiError}</span>
         </div>
       )}
       <div className="space-y-1.5">
