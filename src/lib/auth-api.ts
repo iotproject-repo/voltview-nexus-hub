@@ -52,7 +52,7 @@ export async function handleLogin(payload: LoginPayload) {
 
 export async function handleSignup(payload: SignupPayload) {
   const res = await api.post<AuthResponse>(
-    "/api/v1/auth/register",
+    "/api/v1/auth/signup",
     { name: payload.name, email: payload.email, password: payload.password },
     { auth: false },
   );
