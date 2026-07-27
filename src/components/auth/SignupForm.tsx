@@ -23,6 +23,7 @@ type Values = z.infer<typeof schema>;
 
 export function SignupForm() {
   const [submitting, setSubmitting] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const navigate = useNavigate();
   const {
     register,
@@ -35,15 +36,29 @@ export function SignupForm() {
 
   const onSubmit = async (values: Values) => {
     setSubmitting(true);
-    await handleSignup({ name: values.name, email: values.email, password: values.password });
-    setAuthenticated(true);
-    setSubmitting(false);
-    navigate({ to: "/dashboard" });
+    setApiError(null);
+    try {
+      await handleSignup({ name: values.name, email: values.email, password: values.password });
+      setAuthenticated(true);
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : "Sign up failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {apiError && (
+        <div
+          role="alert"
+          className="rounded-xl border border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-xs text-destructive"
+        >
+          {apiError}
+        </div>
+      )}
       <div className="space-y-1.5">
         <label htmlFor="name" className="text-sm font-medium text-foreground">
           Full Name

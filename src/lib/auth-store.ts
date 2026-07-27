@@ -1,10 +1,11 @@
-// Placeholder client-side auth store. Swap for real session when backend lands.
+// Client-side auth store. JWT `exp` is the source of truth for session validity.
 import { useEffect, useState } from "react";
 
 const KEY = "voltview_auth";
+const TOKEN_KEY = "voltview_token";
 const EVENT = "voltview:auth-change";
 
-// Session durations (ms)
+// Fallback session duration when no JWT exp is available.
 const SESSION_SHORT = 1000 * 60 * 60; // 1 hour
 const SESSION_REMEMBER = 1000 * 60 * 60 * 24 * 30; // 30 days
 
@@ -14,12 +15,41 @@ interface Session {
   remember: boolean;
 }
 
+function decodeJwtExp(token: string): number | null {
+  try {
+    const [, payload] = token.split(".");
+    if (!payload) return null;
+    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    const parsed = JSON.parse(json) as { exp?: number };
+    return typeof parsed.exp === "number" ? parsed.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
 function readSession(): Session | null {
   if (typeof window === "undefined") return null;
   try {
+    // Prefer JWT exp when a token is present.
+    const token = window.localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      const exp = decodeJwtExp(token);
+      if (exp) {
+        const raw = window.localStorage.getItem(KEY);
+        let remember = false;
+        if (raw && raw !== "1") {
+          try {
+            remember = !!(JSON.parse(raw) as Session).remember;
+          } catch {
+            // ignore
+          }
+        }
+        return { v: 1, expiresAt: exp, remember };
+      }
+    }
+
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return null;
-    // Legacy value: "1" -> treat as short session starting now.
     if (raw === "1") {
       const s: Session = { v: 1, expiresAt: Date.now() + SESSION_SHORT, remember: false };
       window.localStorage.setItem(KEY, JSON.stringify(s));
@@ -37,7 +67,10 @@ function writeSession(s: Session | null) {
   if (typeof window === "undefined") return;
   try {
     if (s) window.localStorage.setItem(KEY, JSON.stringify(s));
-    else window.localStorage.removeItem(KEY);
+    else {
+      window.localStorage.removeItem(KEY);
+      window.localStorage.removeItem(TOKEN_KEY);
+    }
     window.dispatchEvent(new Event(EVENT));
   } catch {
     // ignore
@@ -54,7 +87,6 @@ export function isAuthenticated(): boolean {
   return true;
 }
 
-/** Legacy setter kept for compatibility. Creates a short (1h) session. */
 export function setAuthenticated(value: boolean, options?: { remember?: boolean }) {
   if (!value) {
     writeSession(null);
@@ -72,14 +104,18 @@ export function logout() {
   writeSession(null);
 }
 
-/** Only allow internal, same-origin path redirects. */
+/** Notify listeners of an auth change after a token is written externally. */
+export function notifyAuthChange() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(EVENT));
+}
+
 export function sanitizeRedirect(target: unknown, fallback = "/dashboard"): string {
   if (typeof target !== "string" || target.length === 0) return fallback;
   if (!target.startsWith("/") || target.startsWith("//")) return fallback;
   return target;
 }
 
-/** React hook — reactive auth flag with automatic expiry handling. */
 export function useAuth(): boolean {
   const [authed, setAuthed] = useState<boolean>(() => isAuthenticated());
   useEffect(() => {
@@ -87,9 +123,7 @@ export function useAuth(): boolean {
     sync();
     window.addEventListener(EVENT, sync);
     window.addEventListener("storage", sync);
-    // Also re-check periodically so an expired session flips the UI without a nav.
     const interval = window.setInterval(sync, 30_000);
-    // And when the tab regains focus.
     const onVisible = () => {
       if (document.visibilityState === "visible") sync();
     };
