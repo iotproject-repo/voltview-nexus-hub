@@ -1,3 +1,5 @@
+import { api } from "./api-client";
+
 export type DeviceStatus = "online" | "offline";
 
 export interface DeviceSummary {
@@ -35,15 +37,6 @@ export interface DeviceDetail {
   capabilities: DeviceCapabilities;
   relays?: Relay[];
 }
-
-const MOCK_DEVICES: DeviceSummary[] = [
-  { deviceId: "DEV001", deviceName: "Living Room Controller", deviceType: "Home Automation", model: "HV4F", status: "online", lastSeen: "just now" },
-  { deviceId: "DEV002", deviceName: "Office 8-Relay Panel", deviceType: "Home Automation", model: "HV8", status: "online", lastSeen: "2 min ago" },
-  { deviceId: "DEV003", deviceName: "Farm Pump A", deviceType: "Agriculture Controller", model: "AG1", status: "offline", lastSeen: "3 hours ago" },
-  { deviceId: "DEV004", deviceName: "Greenhouse Node", deviceType: "Agriculture Controller", model: "AG3S", status: "online", lastSeen: "1 min ago" },
-  { deviceId: "DEV005", deviceName: "Borewell Pump", deviceType: "Water Pump Controller", model: "WPC-Pro", status: "online", lastSeen: "just now" },
-  { deviceId: "DEV006", deviceName: "Main Panel Meter", deviceType: "Smart Energy Meter", model: "SEM-3P", status: "online", lastSeen: "just now" },
-];
 
 const MOCK_DETAILS: Record<string, DeviceDetail> = {
   DEV001: {
@@ -112,9 +105,64 @@ const MOCK_DETAILS: Record<string, DeviceDetail> = {
 
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
 
+
+
+// Defensive mapper: the backend response shape may vary and some UI fields
+// (deviceType, model, lastSeen) may not be present. When missing we leave
+// them empty rather than invent data. The capability-based frontend
+// architecture is preserved.
+function mapDevice(raw: unknown): DeviceSummary | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const deviceId =
+    (r.deviceId as string) ??
+    (r.device_id as string) ??
+    (r.id as string) ??
+    (r._id as string) ??
+    "";
+  if (!deviceId) return null;
+
+  const deviceName =
+    (r.deviceName as string) ??
+    (r.name as string) ??
+    (r.label as string) ??
+    deviceId;
+
+  const deviceType =
+    (r.deviceType as string) ??
+    (r.type as string) ??
+    (r.category as string) ??
+    "";
+
+  const model = (r.model as string) ?? (r.modelName as string) ?? "";
+
+  let rawStatus: string = (r.status as string) ?? "";
+  if (!rawStatus && typeof r.online === "boolean") rawStatus = r.online ? "online" : "offline";
+  if (!rawStatus && typeof r.isOnline === "boolean") rawStatus = r.isOnline ? "online" : "offline";
+  const status: DeviceStatus = rawStatus.toLowerCase() === "online" ? "online" : "offline";
+
+  const lastSeen =
+    (r.lastSeen as string) ??
+    (r.last_seen as string) ??
+    (r.lastSeenAt as string) ??
+    "";
+
+  return { deviceId, deviceName, deviceType, model, status, lastSeen };
+}
+
 export async function getUserDevices(): Promise<DeviceSummary[]> {
-  await wait(250);
-  return MOCK_DEVICES;
+  const res = await api.get<unknown>("/api/v1/devices");
+  let list: unknown[] = [];
+  if (Array.isArray(res)) list = res;
+  else if (res && typeof res === "object") {
+    const r = res as Record<string, unknown>;
+    if (Array.isArray(r.devices)) list = r.devices;
+    else if (Array.isArray(r.data)) list = r.data;
+    else if (r.data && typeof r.data === "object" && Array.isArray((r.data as Record<string, unknown>).devices)) {
+      list = (r.data as { devices: unknown[] }).devices;
+    }
+  }
+  return list.map(mapDevice).filter((d): d is DeviceSummary => d !== null);
 }
 
 export async function getDeviceCapabilities(deviceId: string): Promise<DeviceDetail> {
