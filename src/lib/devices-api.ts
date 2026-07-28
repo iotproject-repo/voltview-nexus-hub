@@ -38,75 +38,6 @@ export interface DeviceDetail {
   relays?: Relay[];
 }
 
-const MOCK_DETAILS: Record<string, DeviceDetail> = {
-  DEV001: {
-    deviceId: "DEV001",
-    deviceName: "Living Room Controller",
-    model: "HV4F",
-    category: "home_automation",
-    status: "online",
-    capabilities: { relayCount: 4, fan: true, fanSpeedControl: true, scheduler: true, energyMonitoring: false },
-    relays: [
-      { id: 1, name: "Light" },
-      { id: 2, name: "Fan" },
-      { id: 3, name: "Socket" },
-      { id: 4, name: "Garden" },
-    ],
-  },
-  DEV002: {
-    deviceId: "DEV002",
-    deviceName: "Office 8-Relay Panel",
-    model: "HV8",
-    category: "home_automation",
-    status: "online",
-    capabilities: { relayCount: 8, scheduler: true, energyMonitoring: true },
-    relays: Array.from({ length: 8 }, (_, i) => ({ id: i + 1, name: `Channel ${i + 1}` })),
-  },
-  DEV003: {
-    deviceId: "DEV003",
-    deviceName: "Farm Pump A",
-    model: "AG1",
-    category: "agriculture",
-    status: "offline",
-    capabilities: { relayCount: 1, scheduler: true, motorProtection: true },
-    relays: [{ id: 1, name: "Pump" }],
-  },
-  DEV004: {
-    deviceId: "DEV004",
-    deviceName: "Greenhouse Node",
-    model: "AG3S",
-    category: "agriculture",
-    status: "online",
-    capabilities: { relayCount: 3, scheduler: true, temperatureSensor: true, humiditySensor: true },
-    relays: [
-      { id: 1, name: "Drip" },
-      { id: 2, name: "Sprinkler" },
-      { id: 3, name: "Fogger" },
-    ],
-  },
-  DEV005: {
-    deviceId: "DEV005",
-    deviceName: "Borewell Pump",
-    model: "WPC-Pro",
-    category: "water_pump",
-    status: "online",
-    capabilities: { relayCount: 1, waterLevelSensor: true, motorProtection: true, scheduler: true, energyMonitoring: true },
-    relays: [{ id: 1, name: "Motor" }],
-  },
-  DEV006: {
-    deviceId: "DEV006",
-    deviceName: "Main Panel Meter",
-    model: "SEM-3P",
-    category: "energy_meter",
-    status: "online",
-    capabilities: { energyMonitoring: true },
-  },
-};
-
-const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
-
-
-
 // Defensive mapper: the backend response shape may vary and some UI fields
 // (deviceType, model, lastSeen) may not be present. When missing we leave
 // them empty rather than invent data. The capability-based frontend
@@ -165,9 +96,82 @@ export async function getUserDevices(): Promise<DeviceSummary[]> {
   return list.map(mapDevice).filter((d): d is DeviceSummary => d !== null);
 }
 
-export async function getDeviceCapabilities(deviceId: string): Promise<DeviceDetail> {
-  await wait(350);
-  const d = MOCK_DETAILS[deviceId];
-  if (!d) throw new Error("Device not found");
-  return d;
+// Unwrap common backend envelopes: raw object, { data: {...} }, { device: {...} }
+function unwrap(res: unknown): Record<string, unknown> | null {
+  if (!res || typeof res !== "object") return null;
+  const r = res as Record<string, unknown>;
+  if (r.device && typeof r.device === "object") return r.device as Record<string, unknown>;
+  if (r.data && typeof r.data === "object") {
+    const d = r.data as Record<string, unknown>;
+    if (d.device && typeof d.device === "object") return d.device as Record<string, unknown>;
+    return d;
+  }
+  return r;
 }
+
+function mapCapabilities(raw: unknown): DeviceCapabilities {
+  if (!raw || typeof raw !== "object") return {};
+  const c = raw as Record<string, unknown>;
+  const out: DeviceCapabilities = {};
+  if (typeof c.relayCount === "number") out.relayCount = c.relayCount;
+  else if (typeof c.relays === "number") out.relayCount = c.relays as number;
+  if (typeof c.fan === "boolean") out.fan = c.fan;
+  if (typeof c.fanSpeedControl === "boolean") out.fanSpeedControl = c.fanSpeedControl;
+  if (typeof c.scheduler === "boolean") out.scheduler = c.scheduler;
+  if (typeof c.energyMonitoring === "boolean") out.energyMonitoring = c.energyMonitoring;
+  if (typeof c.temperatureSensor === "boolean") out.temperatureSensor = c.temperatureSensor;
+  if (typeof c.humiditySensor === "boolean") out.humiditySensor = c.humiditySensor;
+  if (typeof c.waterLevelSensor === "boolean") out.waterLevelSensor = c.waterLevelSensor;
+  if (typeof c.motorProtection === "boolean") out.motorProtection = c.motorProtection;
+  return out;
+}
+
+function mapRelays(raw: unknown): Relay[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const relays: Relay[] = [];
+  raw.forEach((item, idx) => {
+    if (!item || typeof item !== "object") return;
+    const r = item as Record<string, unknown>;
+    const id = typeof r.id === "number" ? r.id : typeof r.index === "number" ? r.index : idx + 1;
+    const name = (r.name as string) ?? (r.label as string) ?? `Relay ${id}`;
+    relays.push({ id, name });
+  });
+  return relays.length ? relays : undefined;
+}
+
+export async function getDeviceCapabilities(deviceId: string): Promise<DeviceDetail> {
+  const res = await api.get<unknown>(`/api/v1/devices/${encodeURIComponent(deviceId)}`);
+  const d = unwrap(res);
+  if (!d) throw new Error("Device not found");
+
+  const id =
+    (d.deviceId as string) ??
+    (d.device_id as string) ??
+    (d.id as string) ??
+    (d._id as string) ??
+    deviceId;
+
+  const deviceName =
+    (d.deviceName as string) ??
+    (d.name as string) ??
+    (d.label as string) ??
+    id;
+
+  const model = (d.model as string) ?? (d.modelName as string) ?? "";
+  const category =
+    (d.category as string) ??
+    (d.deviceType as string) ??
+    (d.type as string) ??
+    "";
+
+  let rawStatus: string = (d.status as string) ?? "";
+  if (!rawStatus && typeof d.online === "boolean") rawStatus = d.online ? "online" : "offline";
+  if (!rawStatus && typeof d.isOnline === "boolean") rawStatus = d.isOnline ? "online" : "offline";
+  const status: DeviceStatus = rawStatus.toLowerCase() === "online" ? "online" : "offline";
+
+  const capabilities = mapCapabilities(d.capabilities);
+  const relays = mapRelays(d.relays);
+
+  return { deviceId: id, deviceName, model, category, status, capabilities, relays };
+}
+
