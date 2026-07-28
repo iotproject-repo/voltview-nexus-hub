@@ -175,3 +175,14 @@ export async function getDeviceCapabilities(deviceId: string): Promise<DeviceDet
   return { deviceId: id, deviceName, model, category, status, capabilities, relays };
 }
 
+
+// --- Phase 2C: motor command -------------------------------------------
+// POST /api/v1/devices/:deviceId/command  body: { type: "motor", action }
+export type MotorAction = "on" | "off";
+
+export async function sendMotorCommand(deviceId: string, action: MotorAction): Promise<void> {
+  await api.post<unknown>(`/api/v1/devices/${encodeURIComponent(deviceId)}/command`, {
+    type: "motor",
+    action,
+  });
+}

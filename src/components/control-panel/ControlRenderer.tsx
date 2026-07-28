@@ -27,7 +27,7 @@ export function ControlRenderer({ device }: { device: DeviceDetail }) {
       </header>
 
       {!!c.relayCount && c.relayCount > 0 && (
-        <RelayPanel count={c.relayCount} relays={device.relays} />
+        <RelayPanel count={c.relayCount} relays={device.relays} deviceId={device.deviceId} disabled={!online} />
       )}
 
       {c.fanSpeedControl && <FanSlider />}
