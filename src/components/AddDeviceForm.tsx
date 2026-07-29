@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { Loader2, Plus } from "lucide-react";
+import { api } from "@/lib/api-client";
+import { toast } from "sonner";
 
 const addDeviceSchema = z.object({
   deviceId: z.string().min(1, "Device ID is required"),
@@ -28,17 +30,24 @@ export function AddDeviceForm() {
     },
   });
 
-  const handleAddDevice = async (values: AddDeviceFormValues) => {
+const handleAddDevice = async (values: AddDeviceFormValues) => {
     setIsSubmitting(true);
 
-    // Placeholder submission — no backend connection yet.
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    console.log({
-      deviceId: values.deviceId,
-      deviceToken: values.deviceToken,
-    });
+    try {
+      await api.post("/api/v1/devices/claim", {
+        deviceId: values.deviceId,
+        deviceToken: values.deviceToken,
+      });
 
-    setIsSubmitting(false);
+      toast.success("Device claimed successfully");
+      navigate({ to: "/dashboard" });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to claim device. Please try again.";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
