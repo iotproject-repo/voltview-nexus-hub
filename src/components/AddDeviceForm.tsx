@@ -41,14 +41,14 @@ export function AddDeviceForm() {
         deviceToken: values.deviceToken,
       });
       console.log("API Success", response);
-
       toast.success("Device claimed successfully");
       navigate({ to: "/dashboard" });
     } catch (error) {
-      console.error(error);
-      const message =
-        error instanceof Error ? error.message : "Failed to claim device. Please try again.";
-      toast.error(message);
+      console.error("API Error:", error);
+      if (error instanceof Error) {
+        console.error("Message:", error.message);
+      }
+      toast.error(error instanceof Error ? error.message : "Unknown error");
     } finally {
       console.log("Finished");
       setIsSubmitting(false);
