@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { Loader2, Plus } from "lucide-react";
-import { api } from "@/lib/api-client";
+import { api, ApiError } from "@/lib/api-client";
 import { toast } from "sonner";
 
 const addDeviceSchema = z.object({
@@ -14,13 +14,25 @@ const addDeviceSchema = z.object({
 
 type AddDeviceFormValues = z.infer<typeof addDeviceSchema>;
 
+function getBackendError(error: unknown): string {
+  if (error instanceof ApiError && error.data && typeof error.data === "object") {
+    const data = error.data as { error?: unknown; message?: unknown };
+    if (typeof data.error === "string") return data.error;
+    if (typeof data.message === "string") return data.message;
+  }
+  if (error instanceof Error) return error.message;
+  return "Unknown error";
+}
+
 export function AddDeviceForm() {
   const navigate = useNavigate({ from: "/add-device" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<AddDeviceFormValues>({
     resolver: zodResolver(addDeviceSchema),
@@ -33,6 +45,7 @@ export function AddDeviceForm() {
   const handleAddDevice = async (values: AddDeviceFormValues) => {
     console.log("Submitting", values);
     setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       console.log("Before API");
@@ -42,13 +55,17 @@ export function AddDeviceForm() {
       });
       console.log("API Success", response);
       toast.success("Device claimed successfully");
+      reset();
       navigate({ to: "/dashboard" });
     } catch (error) {
       console.error("API Error:", error);
       if (error instanceof Error) {
         console.error("Message:", error.message);
       }
-      toast.error(error instanceof Error ? error.message : "Unknown error");
+      const message = getBackendError(error);
+      console.error("Backend message:", message);
+      setSubmitError(message);
+      toast.error(message);
     } finally {
       console.log("Finished");
       setIsSubmitting(false);
@@ -114,6 +131,15 @@ export function AddDeviceForm() {
           Cancel
         </Link>
       </div>
+
+      {submitError && (
+        <div
+          role="alert"
+          className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+        >
+          {submitError}
+        </div>
+      )}
     </form>
   );
 }
