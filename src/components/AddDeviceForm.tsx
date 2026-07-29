@@ -30,22 +30,27 @@ export function AddDeviceForm() {
     },
   });
 
-const handleAddDevice = async (values: AddDeviceFormValues) => {
+  const handleAddDevice = async (values: AddDeviceFormValues) => {
+    console.log("Submitting", values);
     setIsSubmitting(true);
 
     try {
-      await api.post("/api/v1/devices/claim", {
+      console.log("Before API");
+      const response = await api.post("/api/v1/devices/claim", {
         deviceId: values.deviceId,
         deviceToken: values.deviceToken,
       });
+      console.log("API Success", response);
 
       toast.success("Device claimed successfully");
       navigate({ to: "/dashboard" });
     } catch (error) {
+      console.error(error);
       const message =
         error instanceof Error ? error.message : "Failed to claim device. Please try again.";
       toast.error(message);
     } finally {
+      console.log("Finished");
       setIsSubmitting(false);
     }
   };
