@@ -2,7 +2,7 @@
 // Base URL is fixed for development per user directive.
 import { logout } from "./auth-store";
 
-export const API_BASE_URL = "https://bye-exports-europe-cingular.trycloudflare.com";
+export const API_BASE_URL = "https://materials-pastor-involve-reuters.trycloudflare.com";
 
 const TOKEN_KEY = "voltview_token";
 
